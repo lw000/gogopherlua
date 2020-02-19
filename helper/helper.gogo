@@ -1,0 +1,42 @@
+package helper
+
+import (
+	lua "github.com/yuin/gopher-lua"
+)
+
+func LuaTableToMap(t *lua.LTable) map[string]interface{} {
+	if t == nil {
+		return nil
+	}
+
+	if t.Type() != lua.LTTable {
+		return nil
+	}
+
+	values := make(map[string]interface{})
+	l2M(t, values)
+	return l2M(t, values)
+}
+
+func l2M(table *lua.LTable, values map[string]interface{}) map[string]interface{} {
+	if table == nil {
+		return nil
+	}
+
+	if table.Type() != lua.LTTable {
+		return nil
+	}
+
+	result := make(map[string]interface{})
+	table.ForEach(func(k lua.LValue, v lua.LValue) {
+		switch v.Type() {
+		case lua.LTTable:
+			t := v.(*lua.LTable)
+			m := make(map[string]interface{})
+			l2M(t, m)
+		default:
+			result[k.String()] = v.String()
+		}
+	})
+	return result
+}

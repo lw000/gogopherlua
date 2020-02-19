@@ -1,0 +1,59 @@
+package export_log
+
+import (
+	"bytes"
+	"tuyue/tuyue_gopherlua/helper"
+
+	lua "github.com/yuin/gopher-lua"
+)
+
+var exports = map[string]lua.LGFunction{
+	"debug":  log_debug,
+	"info":   log_info,
+	"waring": log_waring,
+	"error":  log_error,
+}
+
+func getLuaArgs(L *lua.LState) string {
+	top := L.GetTop()
+	if top > 0 {
+		buf := bytes.Buffer{}
+		// args := make([]interface{}, 0, top)
+		for i := 1; i <= top; i++ {
+			lv := L.Get(i)
+			switch lv.Type() {
+			case lua.LTTable:
+				m := helper.LuaTableToMap(lv.(*lua.LTable))
+				for _, v := range m {
+					if _, ok := v.(map[string]interface{}); ok {
+						for _, v1 := range v.(map[string]interface{}) {
+							buf.WriteString(v1.(string))
+							buf.WriteString(" ")
+						}
+					} else {
+						buf.WriteString(v.(string))
+						buf.WriteString(" ")
+					}
+				}
+			default:
+				buf.WriteString(lv.String())
+				buf.WriteString(" ")
+			}
+		}
+
+		return string(buf.Bytes())
+	}
+	return ""
+}
+
+// Loader 加载库函数
+func Loader(L *lua.LState) int {
+	mod := L.SetFuncs(L.NewTable(), exports)
+	L.SetField(mod, "_VERSION", lua.LString("1.0.0"))
+	L.Push(mod)
+	return 1
+}
+
+func Preload(L *lua.LState) {
+	L.PreloadModule("glog", Loader)
+}

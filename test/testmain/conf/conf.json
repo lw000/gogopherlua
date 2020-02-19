@@ -1,0 +1,15 @@
+{
+    "Debug": 1,
+    "count": 10000,
+    "millisecond": 5,
+    "method": "get",
+    "tls": false,
+    "http": {
+        "get": ["http://127.0.0.1:8080", "http://127.0.0.1:8080/get"],
+        "post": ["http://127.0.0.1:8080/post", "http://127.0.0.1:8081/post"]
+    },
+    "https": {
+        "get": ["https://127.0.0.1:8080/test"],
+        "post": ["https://127.0.0.1:8080/test"]
+    }
+}
